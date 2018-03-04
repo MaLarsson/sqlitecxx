@@ -9,6 +9,10 @@ set(CMAKE_CXX_STANDARD 11)
 add_executable(tests tests.cc sqlite3/sqlite3.c)
 target_link_libraries(tests dl pthread)
 
+# Add tests
+enable_testing()
+add_test(Tests tests)
+
 # Compiler warnings
 if (MSVC)
   target_compile_options(tests PRIVATE "/W4")
