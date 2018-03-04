@@ -4,10 +4,10 @@ project(sqlite_wapper)
 
 # Set constants
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread -ldl")
 
 # Make executable
 add_executable(tests tests.cc sqlite3/sqlite3.c)
+target_link_libraries(tests dl pthread)
 
 # Compiler warnings
 if (MSVC)
