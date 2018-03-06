@@ -24,7 +24,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
-before_script:
+before_install:
   - eval "${MATRIX_EVAL}"
 
 script:

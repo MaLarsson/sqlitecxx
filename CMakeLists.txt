@@ -6,7 +6,7 @@ project(sqlite_wapper)
 set(CMAKE_CXX_STANDARD 11)
 
 # Make executable
-add_executable(tests tests.cc sqlite3/sqlite3.c)
+add_executable(tests tests.cc sqlite3/src/sqlite3.c)
 target_link_libraries(tests dl pthread)
 
 # Add tests
@@ -23,4 +23,4 @@ else()
 endif()
 
 # Includes
-include_directories(include sqlite3)
+include_directories(include sqlite3/include)
