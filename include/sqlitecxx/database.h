@@ -6,8 +6,6 @@
 
 namespace sqlite {
 
-inline namespace v1 {
-
 class database {
  public:
     database(const std::string& filename)
@@ -25,8 +23,6 @@ class database {
  private:
     sqlite3* db_;
 };
-
-} // inline namespace v1
 
 } // namespace sqlite
 

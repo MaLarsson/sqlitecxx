@@ -6,8 +6,6 @@
 
 namespace sqlite {
 
-inline namespace v1 {
-
 namespace detail {
 
 class statement {
@@ -55,7 +53,6 @@ class query : public detail::statement {
     bool step() { return sqlite3_step(data()) == sqlite::row; }
 };
 
-} // inline namespace v1
 
 } // namespace sqlite
 

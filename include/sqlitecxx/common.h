@@ -5,8 +5,6 @@
 
 namespace sqlite {
 
-inline namespace v1 {
-
 constexpr int ok = SQLITE_OK;
 constexpr int error = SQLITE_ERROR;
 constexpr int internal = SQLITE_INTERNAL;
@@ -38,8 +36,6 @@ constexpr int notice = SQLITE_NOTICE;
 constexpr int warning = SQLITE_WARNING;
 constexpr int row = SQLITE_ROW;
 constexpr int done = SQLITE_DONE;
-
-} // inline namespace v1
 
 } // namespace sqlite
 
