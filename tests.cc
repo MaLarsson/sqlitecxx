@@ -26,7 +26,7 @@ int main()
     sqlite::query map_data_query(db, "SELECT name FROM testTable");
 
     while (map_data_query.step()) {
-	std::cout << "data!\n";
+	std::cout << map_data_query.get_column<std::string>(0) << '\n';
     }
 
     return 0;

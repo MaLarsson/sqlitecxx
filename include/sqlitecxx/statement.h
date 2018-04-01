@@ -51,8 +51,40 @@ class query : public detail::statement {
 	: statement(db, query) {}
 
     bool step() { return sqlite3_step(data()) == sqlite::row; }
+
+    template <class T>
+    T get_column(size_t index) const = delete;
 };
 
+template <>
+const void* query::get_column(size_t index) const {
+    return sqlite3_column_blob(data(), index);
+}
+
+template <>
+double query::get_column(size_t index) const {
+    return sqlite3_column_double(data(), index);
+}
+
+template <>
+long long int query::get_column(size_t index) const {
+    return sqlite3_column_int64(data(), index);
+}
+
+template <>
+int query::get_column(size_t index) const {
+    return sqlite3_column_int(data(), index);
+}
+
+template <>
+const char* query::get_column(size_t index) const {
+    return reinterpret_cast<const char*>(sqlite3_column_text(data(), index));
+}
+
+template <>
+std::string query::get_column(size_t index) const {
+    return reinterpret_cast<const char*>(sqlite3_column_text(data(), index));
+}
 
 } // namespace sqlite
 
