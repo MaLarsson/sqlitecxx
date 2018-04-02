@@ -54,42 +54,42 @@ class query : public detail::statement {
 
     bool step() { return sqlite3_step(data()) == sqlite::row; }
 
-    template <class T>
-    T get_column(size_t index) const = delete;
+    template <typename T>
+    T get_column(std::size_t index) const = delete;
 };
 
 template <>
-inline const void* query::get_column(size_t index) const {
+inline const void* query::get_column(std::size_t index) const {
     return sqlite3_column_blob(data(), index);
 }
 
 template <>
-inline double query::get_column(size_t index) const {
+inline double query::get_column(std::size_t index) const {
     return sqlite3_column_double(data(), index);
 }
 
 template <>
-inline sqlite_int64 query::get_column(size_t index) const {
+inline sqlite_int64 query::get_column(std::size_t index) const {
     return sqlite3_column_int64(data(), index);
 }
 
 template <>
-inline int query::get_column(size_t index) const {
+inline int query::get_column(std::size_t index) const {
     return sqlite3_column_int(data(), index);
 }
 
 template <>
-inline const char* query::get_column(size_t index) const {
+inline const char* query::get_column(std::size_t index) const {
     return reinterpret_cast<const char*>(sqlite3_column_text(data(), index));
 }
 
 template <>
-inline std::string query::get_column(size_t index) const {
+inline std::string query::get_column(std::size_t index) const {
     return reinterpret_cast<const char*>(sqlite3_column_text(data(), index));
 }
 
 template <>
-inline sqlite3_value* query::get_column(size_t index) const {
+inline sqlite3_value* query::get_column(std::size_t index) const {
     return sqlite3_column_value(data(), index);
 }
 
