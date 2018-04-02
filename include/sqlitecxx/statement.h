@@ -16,6 +16,16 @@ class statement {
     void reset() { sqlite3_reset(stmt_); }
     void clear_bindings() { sqlite3_clear_bindings(stmt_); }
 
+    template <typename T>
+    void bind_index(T&& param, std::size_t index) {
+	sqlite3_bind_text(stmt_, index, param, -1, SQLITE_TRANSIENT);
+    }
+
+    template <typename ...Args>
+    void bind(Args&&... args) {
+	bind_indices(std::index_sequence_for<Args...>{}, std::forward<Args>(args)...);
+    }
+
  protected:
     statement(const database& db, const std::string& query)
 	: statement(db, query.c_str()) {}
@@ -29,6 +39,13 @@ class statement {
 
  private:
     sqlite3_stmt* stmt_;
+
+    struct pass { template <typename ...T> pass(T...) {} };
+
+    template <typename ...Args, std::size_t ...I>
+    void bind_indices(std::index_sequence<I...>, Args&&... args) {
+	pass{ (bind_index(args, I + 1), 1)... };
+    }
 };
 
 } // namespace detail

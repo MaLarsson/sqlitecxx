@@ -29,5 +29,24 @@ int main()
 	std::cout << map_data_query.get_column<std::string>(0) << '\n';
     }
 
+    // test bind
+    sqlite::query bind_query(db, "SELECT id, name FROM testTable WHERE testTable.name = ? OR testTable.name = ?");
+    bind_query.bind_index("pelle", 1);
+    bind_query.bind_index("sten", 2);
+
+    while (bind_query.step()) {
+	std::cout << "index for " << bind_query.get_column<std::string>(1) << " is: " <<
+	    bind_query.get_column<int>(0) << '\n';
+    }
+
+    bind_query.reset();
+    bind_query.clear_bindings();
+    bind_query.bind("kalle", "sten");
+
+    while (bind_query.step()) {
+	std::cout << "index for " << bind_query.get_column<std::string>(1) << " is: " <<
+	    bind_query.get_column<int>(0) << '\n';
+    }
+
     return 0;
 }

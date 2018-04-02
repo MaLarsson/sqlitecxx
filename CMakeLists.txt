@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 project(sqlite_wapper)
 
 # Set constants
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 # Make executable
 add_executable(tests tests.cc sqlite3/src/sqlite3.c)
