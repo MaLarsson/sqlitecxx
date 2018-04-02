@@ -12,7 +12,9 @@ class statement {
  public:
     sqlite3_stmt* data() const noexcept { return stmt_; }
 
-    bool finalize() { return sqlite3_finalize(stmt_) == sqlite::ok; }
+    void finalize() { sqlite3_finalize(stmt_); }
+    void reset() { sqlite3_reset(stmt_); }
+    void clear_bindings() { sqlite3_clear_bindings(stmt_); }
 
  protected:
     statement(const database& db, const std::string& query)
