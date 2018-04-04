@@ -22,7 +22,7 @@ matrix:
       env:
         - CC=clang
         - CXX=clang++
-        - CXXFLAGS="-std=c++14 -Wpedantic -Wall -Wextra"
+        - CXXFLAGS="-std=c++14 -stdlib=libc++ -Wpedantic -Wall -Wextra"
 
 script:
   - cmake .
