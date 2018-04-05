@@ -72,7 +72,7 @@ class query : public detail::statement {
     bool step() { return sqlite3_step(data()) == sqlite::row; }
 
     template <typename T>
-    T get_column(std::size_t index) const = delete;
+    inline T get_column(std::size_t index) const = delete;
 };
 
 template <>
