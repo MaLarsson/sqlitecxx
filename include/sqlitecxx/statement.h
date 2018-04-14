@@ -2,14 +2,27 @@
 #define SQLITECXX_STATEMENT_H_
 
 #include <string>
+#include <memory>
+#include <utility>
+
 #include "common.h"
 
 namespace sqlite {
 
 namespace detail {
 
-class statement {
+class statement_impl {
  public:
+    statement_impl(const database& db, const std::string& query)
+	: statement_impl(db, query.c_str()) {}
+
+    statement_impl(const database& db, const char* query)
+	: stmt_(nullptr) {
+	sqlite3_prepare_v2(db.data(), query, -1, &stmt_, nullptr);
+    }
+
+    ~statement_impl() { finalize(); }
+
     sqlite3_stmt* data() const noexcept { return stmt_; }
 
     void finalize() { sqlite3_finalize(stmt_); }
@@ -26,17 +39,6 @@ class statement {
 	bind_indices(std::index_sequence_for<Args...>{}, std::forward<Args>(args)...);
     }
 
- protected:
-    statement(const database& db, const std::string& query)
-	: statement(db, query.c_str()) {}
-
-    statement(const database& db, const char* query)
-	: stmt_(nullptr) {
-	sqlite3_prepare_v2(db.data(), query, -1, &stmt_, nullptr);
-    }
-
-    ~statement() { finalize(); }
-
  private:
     sqlite3_stmt* stmt_;
 
@@ -46,6 +48,36 @@ class statement {
     void bind_indices(std::index_sequence<I...>, Args&&... args) {
 	pass{ (bind_index(args, I + 1), 1)... };
     }
+};
+
+class statement {
+ public:
+    sqlite3_stmt* data() const noexcept { return impl_->data(); }
+
+    void finalize() { impl_->finalize(); }
+    void reset() { impl_->reset(); }
+    void clear_bindings() { impl_->clear_bindings(); }
+
+    template <typename T>
+    void bind_index(T&& param, std::size_t index) {
+	impl_->bind_index(std::forward<T>(param), index);
+    }
+
+    template <typename ...Args>
+    void bind(Args&&... args) { impl_->bind(std::forward<Args>(args)...); }
+
+ protected:
+    statement(const database& db, const std::string& query)
+	: statement(db, query.c_str()) {}
+
+    statement(const database& db, const char* query)
+	: impl_(std::make_shared<statement_impl>(db, query)) {
+	auto stmt = impl_->data();
+	sqlite3_prepare_v2(db.data(), query, -1, &stmt, nullptr);
+    }
+
+ private:
+    std::shared_ptr<statement_impl> impl_;
 };
 
 } // namespace detail
