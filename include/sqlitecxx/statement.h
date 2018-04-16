@@ -11,27 +11,16 @@ namespace sqlite {
 
 namespace detail {
 
-class statement_impl {
+class statement {
  public:
-    statement_impl(const database& db, const std::string& query)
-	: statement_impl(db, query.c_str()) {}
-
-    statement_impl(const database& db, const char* query)
-	: stmt_(nullptr) {
-	sqlite3_prepare_v2(db.data(), query, -1, &stmt_, nullptr);
-    }
-
-    ~statement_impl() { finalize(); }
-
-    sqlite3_stmt* data() const noexcept { return stmt_; }
-
-    void finalize() { sqlite3_finalize(stmt_); }
-    void reset() { sqlite3_reset(stmt_); }
-    void clear_bindings() { sqlite3_clear_bindings(stmt_); }
+    sqlite3_stmt* data() const noexcept { return ptr_->data(); }
+    void finalize() noexcept { ptr_->finalize(); }
+    void reset() noexcept { sqlite3_reset(data()); }
+    void clear_bindings() noexcept { sqlite3_clear_bindings(data()); }
 
     template <typename T>
     void bind_index(T&& param, std::size_t index) {
-	sqlite3_bind_text(stmt_, index, param, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(data(), index, param, -1, SQLITE_TRANSIENT);
     }
 
     template <typename ...Args>
@@ -39,8 +28,31 @@ class statement_impl {
 	bind_indices(std::index_sequence_for<Args...>{}, std::forward<Args>(args)...);
     }
 
+ protected:
+    statement(const database& db, const std::string& query)
+	: statement(db, query.c_str()) {}
+
+    statement(const database& db, const char* query)
+	: ptr_(std::make_shared<ptr>(db, query)) {}
+
  private:
-    sqlite3_stmt* stmt_;
+    class ptr {
+     public:
+	ptr(const database& db, const char* query)
+	    : stmt_(nullptr) {
+	    sqlite3_prepare_v2(db.data(), query, -1, &stmt_, nullptr);
+	}
+
+	~ptr() { finalize(); }
+
+	sqlite3_stmt* data() const noexcept { return stmt_; }
+	void finalize() noexcept { sqlite3_finalize(stmt_); }
+
+     private:
+	sqlite3_stmt* stmt_;
+    };
+
+    std::shared_ptr<ptr> ptr_;
 
     struct pass { template <typename ...T> pass(T...) {} };
 
@@ -48,36 +60,6 @@ class statement_impl {
     void bind_indices(std::index_sequence<I...>, Args&&... args) {
 	pass{ (bind_index(args, I + 1), 1)... };
     }
-};
-
-class statement {
- public:
-    sqlite3_stmt* data() const noexcept { return impl_->data(); }
-
-    void finalize() { impl_->finalize(); }
-    void reset() { impl_->reset(); }
-    void clear_bindings() { impl_->clear_bindings(); }
-
-    template <typename T>
-    void bind_index(T&& param, std::size_t index) {
-	impl_->bind_index(std::forward<T>(param), index);
-    }
-
-    template <typename ...Args>
-    void bind(Args&&... args) { impl_->bind(std::forward<Args>(args)...); }
-
- protected:
-    statement(const database& db, const std::string& query)
-	: statement(db, query.c_str()) {}
-
-    statement(const database& db, const char* query)
-	: impl_(std::make_shared<statement_impl>(db, query)) {
-	auto stmt = impl_->data();
-	sqlite3_prepare_v2(db.data(), query, -1, &stmt, nullptr);
-    }
-
- private:
-    std::shared_ptr<statement_impl> impl_;
 };
 
 } // namespace detail
@@ -90,7 +72,7 @@ class command : public detail::statement {
     command(const database& db, const char* query)
 	: statement(db, query) {}
 
-    bool execute() { return sqlite3_step(data()) == sqlite::done; }
+    bool execute() noexcept { return sqlite3_step(data()) == sqlite::done; }
 };
 
 class query : public detail::statement {
@@ -101,7 +83,7 @@ class query : public detail::statement {
     query(const database& db, const char* query)
 	: statement(db, query) {}
 
-    bool step() { return sqlite3_step(data()) == sqlite::row; }
+    bool step() noexcept { return sqlite3_step(data()) == sqlite::row; }
 
     template <typename T>
     T get_column(std::size_t) const { return T(); }

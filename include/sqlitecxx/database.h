@@ -2,6 +2,8 @@
 #define SQLITECXX_DATABASE_H_
 
 #include <string>
+#include <memory>
+
 #include "common.h"
 
 namespace sqlite {
@@ -12,16 +14,27 @@ class database {
 	: database(filename.c_str()) {}
 
     database(const char* filename)
-	: db_(nullptr) {
-	sqlite3_open(filename, &db_);
-    }
+	: ptr_(std::make_shared<ptr>(filename)) {}
 
-    ~database() { sqlite3_close(db_); }
-
-    sqlite3* data() const noexcept { return db_; }
+    sqlite3* data() const noexcept { return ptr_->data(); }
 
  private:
-    sqlite3* db_;
+    class ptr {
+     public:
+        ptr(const char* filename)
+	    : db_(nullptr) {
+	    sqlite3_open(filename, &db_);
+	}
+
+	~ptr() { sqlite3_close(db_); }
+
+	sqlite3* data() const noexcept { return db_; }
+
+     private:
+	sqlite3* db_;
+    };
+
+    std::shared_ptr<ptr> ptr_;
 };
 
 } // namespace sqlite
