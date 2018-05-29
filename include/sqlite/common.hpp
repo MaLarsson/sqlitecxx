@@ -1,5 +1,4 @@
-#ifndef SQLITECXX_COMMON_H_
-#define SQLITECXX_COMMON_H_
+#pragma once
 
 #include <sqlite3.h>
 
@@ -38,5 +37,3 @@ constexpr int row = SQLITE_ROW;
 constexpr int done = SQLITE_DONE;
 
 } // namespace sqlite
-
-#endif // SQLITECXX_COMMON_H_

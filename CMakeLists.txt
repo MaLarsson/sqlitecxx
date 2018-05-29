@@ -1,26 +1,35 @@
 # Main CMakeLists.txt
 cmake_minimum_required(VERSION 3.2)
-project(sqlite_wapper)
+project(sqlitecxx)
 
 # Set constants
 set(CMAKE_CXX_STANDARD 14)
 
-# Make executable
-add_executable(tests tests.cc sqlite3/src/sqlite3.c)
-target_link_libraries(tests dl pthread)
-
-# Add tests
-enable_testing()
-add_test(Tests tests)
-
 # Compiler warnings
 if (MSVC)
-  target_compile_options(tests PRIVATE "/W4")
+  add_compile_options("/W4")
 else()
-  target_compile_options(tests PRIVATE "-Wpedantic")
-  target_compile_options(tests PRIVATE "-Wall")
-  target_compile_options(tests PRIVATE "-Wextra")
+  add_compile_options("-Wpedantic")
+  add_compile_options("-Wall")
+  add_compile_options("-Wextra")
 endif()
 
-# Includes
-include_directories(include sqlite3/include)
+# Add sqlite3 c library
+include(cmake/DownloadProject/DownloadProject.cmake)
+
+download_project(
+  PROJ sqlite3
+  GIT_REPOSITORY https://github.com/MaLarsson/sqlite3
+  GIT_TAG master
+  UPDATE_DISCONNECTED 1)
+
+add_subdirectory(${sqlite3_SOURCE_DIR} ${sqlite3_BINARY_DIR})
+
+# Add sqlitecxx library
+add_library(sqlitecxx INTERFACE)
+
+target_include_directories(sqlitecxx INTERFACE include)
+target_link_libraries(sqlitecxx INTERFACE sqlite3)
+
+# Add tests
+add_subdirectory(tests)

@@ -1,14 +1,13 @@
-#ifndef SQLITECXX_STATEMENT_H_
-#define SQLITECXX_STATEMENT_H_
+#pragma once
 
 #include <string>
 #include <memory>
 #include <utility>
 
-#include "common.h"
+#include "common.hpp"
+#include "database.hpp"
 
 namespace sqlite {
-
 namespace detail {
 
 class statement {
@@ -33,17 +32,17 @@ class statement {
 	: statement(db, query.c_str()) {}
 
     statement(const database& db, const char* query)
-	: ptr_(std::make_shared<ptr>(db, query)) {}
+	: ptr_(std::make_shared<resource>(db, query)) {}
 
  private:
-    class ptr {
+    class resource {
      public:
-	ptr(const database& db, const char* query)
+        resource(const database& db, const char* query)
 	    : stmt_(nullptr) {
 	    sqlite3_prepare_v2(db.data(), query, -1, &stmt_, nullptr);
 	}
 
-	~ptr() { finalize(); }
+	~resource() { finalize(); }
 
 	sqlite3_stmt* data() const noexcept { return stmt_; }
 	void finalize() noexcept { sqlite3_finalize(stmt_); }
@@ -52,7 +51,7 @@ class statement {
 	sqlite3_stmt* stmt_;
     };
 
-    std::shared_ptr<ptr> ptr_;
+    std::shared_ptr<resource> ptr_;
 
     struct pass { template <typename ...T> pass(T...) {} };
 
@@ -125,5 +124,3 @@ inline sqlite3_value* query::get_column(std::size_t index) const {
 }
 
 } // namespace sqlite
-
-#endif // SQLITECXX_STATEMENT_H_
