@@ -1,7 +1,7 @@
 include(CTest)
 enable_testing()
 
-include(../cmake/DownloadProject/DownloadProject.cmake)
+include(../cmake/DownloadProject.cmake)
 
 download_project(
   PROJ googletest

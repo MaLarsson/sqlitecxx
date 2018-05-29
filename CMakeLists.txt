@@ -15,7 +15,7 @@ else()
 endif()
 
 # Add sqlite3 c library
-include(cmake/DownloadProject/DownloadProject.cmake)
+include(cmake/DownloadProject.cmake)
 
 download_project(
   PROJ sqlite3
